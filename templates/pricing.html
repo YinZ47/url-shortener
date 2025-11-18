@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - LinkShort{% endblock %}
+
+{% block extra_head %}
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Simple, Transparent Pricing</h1>
+        <p class="lead text-muted">Choose the plan that works best for you</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <!-- Free Plan -->
+        <div class="col-md-5 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white text-center py-4">
+                    <h3>Free</h3>
+                    <div class="display-4 fw-bold">$0</div>
+                    <div class="text-muted">forever</div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            5 links per month
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Basic click analytics
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Link management dashboard
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-x-circle text-muted"></i>
+                            Advanced analytics
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-x-circle text-muted"></i>
+                            Priority support
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-x-circle text-muted"></i>
+                            No advertisements
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        {% if user %}
+                            {% if not user.is_premium %}
+                                <button class="btn btn-outline-primary" disabled>Current Plan</button>
+                            {% else %}
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">View Dashboard</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('signup') }}" class="btn btn-outline-primary">Get Started</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Premium Plan -->
+        <div class="col-md-5 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3>Premium</h3>
+                    <div class="display-4 fw-bold">$4.99</div>
+                    <div>per month</div>
+                    <span class="badge bg-warning text-dark mt-2">BEST VALUE</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <strong>Unlimited links</strong>
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <strong>Advanced analytics</strong>
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Link management dashboard
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Click history & trends
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Priority support
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            Ad-free experience
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        {% if user %}
+                            {% if user.is_premium %}
+                                <button class="btn btn-success" disabled>
+                                    <i class="bi bi-check-circle"></i> Current Plan
+                                </button>
+                            {% else %}
+                                <form action="{{ url_for('subscribe') }}" method="POST">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-credit-card"></i> Upgrade Now
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary">Start Free Trial</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <p class="text-muted">
+                <i class="bi bi-shield-check"></i> 
+                Secure payment processing by Stripe. Cancel anytime.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
