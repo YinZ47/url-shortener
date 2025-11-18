@@ -1,5 +1,7 @@
 import string
 import random
+import requests
+import os
 from urllib.parse import urlparse
 from flask import request
 
@@ -24,3 +26,21 @@ def get_client_ip():
         return request.environ.get('HTTP_X_REAL_IP')
     else:
         return request.environ.get('REMOTE_ADDR')
+
+def get_ip_location(ip_address):
+    """Get geolocation for IP address"""
+    api_key = os.environ.get('IPAPI_KEY')
+    if not api_key:
+        return None
+    
+    try:
+        response = requests.get(
+            f'https://ipapi.co/{ip_address}/json/',
+            params={'key': api_key},
+            timeout=5
+        )
+        if response.status_code == 200:
+            return response.json()
+    except:
+        pass
+    return None
