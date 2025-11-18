@@ -21,7 +21,13 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///urlshortener.db')
+# Use DATABASE_URL if provided; otherwise default to an ephemeral writable path
+# in serverless environments (absolute /tmp path). For a file-based SQLite DB
+# absolute path needs four slashes (sqlite:////absolute/path.db).
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL',
+    'sqlite:////tmp/urlshortener.db'
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
@@ -40,9 +46,22 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-# Create tables
-with app.app_context():
-    db.create_all()
+# Create tables only when explicitly requested (or in development).
+# Running db.create_all() during module import can crash serverless functions
+# if the filesystem or DB is not writable. Set INIT_DB=1 (or run locally with
+# FLASK_ENV=development) to initialize the database during startup.
+try:
+    if os.environ.get('INIT_DB', '') == '1' or os.environ.get('FLASK_ENV', '') == 'development':
+        with app.app_context():
+            try:
+                db.create_all()
+                app.logger.info('Database tables created via INIT_DB/FLASK_ENV')
+            except Exception:
+                app.logger.exception('Database initialization failed; skipping create_all()')
+except Exception:
+    # Defensive: ensure that import-time errors do not silently break serverless
+    # function startup; log and continue.
+    app.logger.exception('Unexpected error while checking INIT_DB')
 
 @app.route('/')
 def index():
